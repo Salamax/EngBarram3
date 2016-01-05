@@ -1,0 +1,10 @@
+Private Sub Workbook_Open()
+
+If Registrado = False Then
+
+    Call MsgBox("Este arquivo não pode ser aberto neste computador.", vbCritical, "Erro")
+    Workbooks.Close
+    
+End If
+
+End Sub
