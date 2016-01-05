@@ -1,0 +1,3264 @@
+Dim linha As Integer
+Dim coluna As Integer
+Dim monopolarA As Integer
+Dim monopolarB As Integer
+Dim monopolarC As Integer
+Dim bipolarAB As Integer
+Dim bipolarAC As Integer
+Dim bipolarBC As Integer
+Dim tripolarABC As Integer
+Dim cont As Integer
+Dim linhascript As Integer
+Dim x As Integer
+Dim xinicial As Integer
+Dim y As Integer
+Dim r As Integer
+Dim vx As Integer
+Dim vy As Integer
+Dim esquerda As Integer
+Dim direita As Integer
+Dim hor As Integer
+Dim sobelinha As Integer
+Dim alturatexto As Integer
+Dim angulotexto As Integer
+Dim distext As Integer
+Dim distext2 As Integer
+Dim dtxt As Integer
+Dim dtxt2 As Integer
+Dim trimhorizontal As Integer
+Dim ncolchete As Integer
+
+Private Sub gerar_Click()
+
+    Dados.Select
+    Cells.Select
+    Selection.ClearContents
+    Dados.Cells(1, 1).Select
+
+linha = 1
+coluna = 1
+
+If monoa <> "" Then
+cont = 1
+monopolarA = monoa
+Do While (monopolarA <> 0)
+Dados.Cells(linha, coluna) = "Monopolar A" & cont
+Dados.Cells(linha, 5) = "MonopolarA"
+linha = linha + 1
+cont = cont + 1
+monopolarA = monopolarA - 1
+Loop
+End If
+
+
+If monob <> "" Then
+cont = 1
+monopolarB = monob
+Do While (monopolarB <> 0)
+Dados.Cells(linha, coluna) = "Monopolar B" & cont
+Dados.Cells(linha, 5) = "MonopolarB"
+linha = linha + 1
+cont = cont + 1
+monopolarB = monopolarB - 1
+Loop
+End If
+
+If monoc <> "" Then
+cont = 1
+monopolarC = monoc
+Do While (monopolarC <> 0)
+Dados.Cells(linha, coluna) = "Monopolar C" & cont
+Dados.Cells(linha, 5) = "MonopolarC"
+linha = linha + 1
+cont = cont + 1
+monopolarC = monopolarC - 1
+Loop
+End If
+
+If biab <> "" Then
+cont = 1
+bipolarAB = biab
+Do While (bipolarAB <> 0)
+Dados.Cells(linha, coluna) = "Bipolar AB" & cont
+Dados.Cells(linha, 5) = "BipolarAB"
+linha = linha + 1
+cont = cont + 1
+bipolarAB = bipolarAB - 1
+Loop
+End If
+
+If biac <> "" Then
+cont = 1
+bipolarAC = biac
+Do While (bipolarAC <> 0)
+Dados.Cells(linha, coluna) = "Bipolar AC" & cont
+Dados.Cells(linha, 5) = "BipolarAC"
+linha = linha + 1
+cont = cont + 1
+bipolarAC = bipolarAC - 1
+Loop
+End If
+
+If bibc <> "" Then
+cont = 1
+bipolarBC = bibc
+Do While (bipolarBC <> 0)
+Dados.Cells(linha, coluna) = "Bipolar BC" & cont
+Dados.Cells(linha, 5) = "BipolarBC"
+linha = linha + 1
+cont = cont + 1
+bipolarBC = bipolarBC - 1
+Loop
+End If
+
+If tri <> "" Then
+cont = 1
+tripolarABC = tri
+Do While (tripolarABC <> 0)
+Dados.Cells(linha, coluna) = "Tripolar" & cont
+Dados.Cells(linha, 5) = "Tripolar"
+linha = linha + 1
+cont = cont + 1
+tripolarABC = tripolarABC - 1
+Loop
+End If
+
+listacircuito.Clear
+cont = 1
+Do While Dados.Cells(cont, 1) <> ""
+listacircuito.AddItem Dados.Cells(cont, 1)
+cont = cont + 1
+Loop
+
+End Sub
+
+Private Sub correntecircuito_Change()
+If listacircuito.ListCount <> 0 Then
+If listacircuito.ListIndex > -1 Then
+Dados.Cells(listacircuito.ListIndex + 1, 4) = correntecircuito
+End If
+End If
+
+End Sub
+
+Private Sub nomecircuito_Change()
+If listacircuito.ListCount <> 0 Then
+If listacircuito.ListIndex > -1 Then
+Dados.Cells(listacircuito.ListIndex + 1, 3) = nomecircuito
+End If
+End If
+
+End Sub
+
+Private Sub numerocircuito_Change()
+If listacircuito.ListCount <> 0 Then
+If listacircuito.ListIndex > -1 Then
+Dados.Cells(listacircuito.ListIndex + 1, 2) = numerocircuito
+End If
+End If
+
+End Sub
+
+Private Sub listacircuito_Click()
+
+cont = 2
+If Dados.Cells(listacircuito.ListIndex + 1, cont) <> "" Then
+numerocircuito = Dados.Cells(listacircuito.ListIndex + 1, cont)
+Else
+numerocircuito = ""
+End If
+cont = cont + 1
+If Dados.Cells(listacircuito.ListIndex + 1, cont) <> "" Then
+nomecircuito = Dados.Cells(listacircuito.ListIndex + 1, cont)
+Else
+nomecircuito = ""
+End If
+cont = cont + 1
+If Dados.Cells(listacircuito.ListIndex + 1, cont) <> "" Then
+correntecircuito = Dados.Cells(listacircuito.ListIndex + 1, cont)
+Else
+correntecircuito = ""
+End If
+
+End Sub
+
+
+
+
+Private Sub gerascript_Click()
+
+sobelinha = listacircuito.ListCount 'LEITURA DAS LINHAS DOS DISJUNTORES LISTADOS NA PLANILHA DE DADOS
+
+    Script.Activate
+    Script.Columns(1).Select
+    Selection.Delete Shift:=xlToLeft
+        
+trimhorizontal = 1 'VARIÁVEL DE CONTROLE PARA QUANDO O BARRAMENTO É CORTADO
+'NO CONTROLE FOI USADO 1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C) / AINDA -5 OU -6 SE O ESPAÇO ESTIVER NA DIREITA E NAO NA ESQUERDA
+
+esquerda = 0 'CONTADOR DE ESPAÇOS OCUPADOS NA DIREITA
+direita = 0 'CONTADOR DE ESPAÇOS OCUPADOS NA DIREITA
+x = 0 'POSIÇÃO HORIZONTAL DE INICIO RELATIVA
+xinicial = 0 'POSIÇÃO HORIZONTAL DE INÍCIO BRUTA
+y = 0 'POSIÇÃO VERTICAL DE INICIO
+r = 5 'RAIO DOS CIRCULOS DO DISJUNTOR
+vx = 50 'DISTANCIA ENTRE OS CIRCULOS DE UM DISJUNTOR
+vy = -75 'DISTANCIA VERTICAL ENTRE DOIS DISJUNTORES
+hor = 320 'DISTANCIA ENTRE OS CIRCULOS ESQUERDOS DOS DISJUNTORES DO LADO ESQUERDO E DIREITO DO PAINEL
+linhascript = 1 'CONTADOR DE LINHAS DO SCRIPT
+alturatexto = 15 'ALTURA DO TEXTO
+angulotexto = 0 'ANGULAÇÃO DO TEXTO
+dtxt = 500 'DISTANCIA DO DISJUNTOR ATÉ O NUMERO DO CIRCUITO
+dtxt2 = 750 'DISTANCIA DO DISJUNTOR ATÉ O NOME DO CIRCUITO
+distext = dtxt
+distext = dtxt2
+ncolchete = 1
+
+If Dados.Cells(1, 1) <> "" Then
+If Dados.Cells(1, 5) <> "" Then
+
+If tri <> "" Then
+tripolarABC = tri
+Else: tripolarABC = 0
+End If
+
+If biab <> "" Then
+bipolarAB = biab
+Else: bipolarAB = 0
+End If
+
+If biac <> "" Then
+bipolarAC = biac
+Else: bipolarAC = 0
+End If
+
+If bibc <> "" Then
+bipolarBC = bibc
+Else: bipolarBC = 0
+End If
+
+If monoa <> "" Then
+monopolarA = monoa
+Else: monopolarA = 0
+End If
+
+If monob <> "" Then
+monopolarB = monob
+Else: monopolarB = 0
+End If
+
+If monoc <> "" Then
+monopolarC = monoc
+Else: monopolarC = 0
+End If
+
+Dados.Activate
+
+
+'ZOOM WINDOWS
+Script.Cells(linhascript, 1) = "zoom"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "window"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = -300 & "," & 300
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = 850 & "," & -850
+                                                                           linhascript = linhascript + 1
+
+
+    Do While tripolarABC > 1
+        'ESQUERDA
+            Call ladoesquerdo
+            sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+            Call tripolar
+            Dados.Cells(sobelinha, 5).Clear
+            tripolarABC = tripolarABC - 1
+            Call contatoA
+            esquerda = esquerda + 1
+            y = vy * esquerda
+            Call contatoB
+            esquerda = esquerda + 1
+            y = vy * esquerda
+            Call contatoC
+            esquerda = esquerda + 1
+        'DIREITA
+            Call ladodireito
+            sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+            Call tripolar
+            Dados.Cells(sobelinha, 5).Clear
+            tripolarABC = tripolarABC - 1
+            direita = direita + 3
+    Loop
+                   'printf("\n________A__________________________\n");
+                     'printf("   |                           |   ");
+                   'printf("\n___|_____________B_____________|___\n");
+                     'printf("   |                           |   ");
+                   'printf("\n___|______________________C____|___\n");
+
+
+If tripolarABC = 1 Then
+    If bipolarAB > 0 Then
+        If monopolarC > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAB = bipolarAB - 1
+                direita = direita + 2
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1
+        End If
+    End If
+End If
+                   'printf("\n________A__________________________\n");
+                     'printf("   |                           |   ");
+                   'printf("\n___|_____________B_____________|___\n");
+                     'printf("   |                               ");
+                   'printf("\n___|______________________C________\n");
+
+
+If tripolarABC = 1 Then
+    If bipolarAC > 0 Then
+        If monopolarB > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                 Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAC = bipolarAC - 1
+                direita = direita + 2
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                direita = direita + 1
+        End If
+    End If
+End If
+                   'printf("\n________A__________________________\n");
+                     'printf("   |                           |   ");
+                   'printf("\n___|______________________C____|___\n");
+                     'printf("   |                               ");
+                   'printf("\n___|_____________B_________________\n");
+
+
+                   
+If tripolarABC = 1 Then
+    If bipolarBC > 0 Then
+        If monopolarA > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarBC = bipolarBC - 1
+                direita = direita + 2
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                direita = direita + 1
+        End If
+    End If
+End If
+                   'printf("\n_________________B_________________\n");
+                     'printf("   |                           |   ");
+                   'printf("\n___|______________________C____|___\n");
+                     'printf("   |                               ");
+                   'printf("\n___|____A__________________________\n");
+
+
+
+
+
+If tripolarABC = 1 Then
+    If monopolarA > 0 Then
+        If monopolarB > 0 Then
+            If monopolarC > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                direita = direita + 1
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                direita = direita + 1
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1
+            End If
+        End If
+    End If
+End If
+                   'printf("\n________A__________________________\n");
+                     'printf("   |                               ");
+                   'printf("\n___|_____________B_________________\n");
+                     'printf("   |                               ");
+                   'printf("\n___|______________________C________\n");
+
+
+
+
+
+                   
+If tripolarABC = 1 Then
+    If bipolarAB > 0 Then
+        If monopolarC = 0 Then
+            If monopolarA = 1 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAB = bipolarAB - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 3 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                direita = direita + 3
+            End If
+        End If
+    End If
+End If
+                   'printf("\n________A__________________________\n");
+                     'printf("   |                           |   ");
+                   'printf("\n___|_____________B_____________|___\n");
+                     'printf("                               |   ");
+                   'printf("\n________A                 C____|___\n");
+
+
+
+If tripolarABC = 1 Then
+    If bipolarAB > 0 Then
+        If monopolarC = 0 Then
+            If monopolarB = 1 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAB = bipolarAB - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                Call contatoB
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 2 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                direita = direita + 3
+            End If
+        End If
+    End If
+End If
+                   'printf("\n________A__________________________\n");
+                     'printf("   |                           |   ");
+                   'printf("\n___|_____________B_____________|___\n");
+                     'printf("                               |   ");
+                   'printf("\n_________________B        C____|___\n");
+
+
+
+
+If tripolarABC = 1 Then
+    If bipolarAB > 0 Then
+        If monopolarC = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAB = bipolarAB - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 6 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1 'REVER SLOT VAZIO
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                direita = direita + 3
+        End If
+    End If
+End If
+
+                   'printf("\n________A__________________________\n");
+                     'printf("   |                           |   ");
+                   'printf("\n___|_____________B_____________|___\n");
+                     'printf("                               |   ");
+                   'printf("\n                          C____|___\n");
+                   
+
+
+If tripolarABC = 1 Then
+    If bipolarAC > 0 Then
+        If monopolarB = 0 Then
+            If monopolarA = 1 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAC = bipolarAC - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 1 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                direita = direita + 3
+            End If
+        End If
+    End If
+End If
+                   'printf("\n________A__________________________\n");
+                     'printf("   |                           |   ");
+                   'printf("\n___|______________________C____|___\n");
+                     'printf("                               |   ");
+                   'printf("\n________A        B_____________|___\n");
+
+
+
+If tripolarABC = 1 Then
+    If bipolarAC > 0 Then
+        If monopolarB = 0 Then
+            If monopolarC = 1 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 2 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAC = bipolarAC - 1
+                direita = direita + 2
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1
+            End If
+        End If
+    End If
+End If
+                   'printf("\n________A__________________________\n");
+                     'printf("   |                           |   ");
+                   'printf("\n___|______________________C____|___\n");
+                     'printf("   |                               ");
+                   'printf("\n___|_____________B        C________\n");
+
+
+If tripolarABC = 1 Then
+    If bipolarAC > 0 Then
+        If monopolarB = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAC = bipolarAC - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 5 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1 'REVER POIS FICA SLOT VAZIO
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                direita = direita + 3
+        End If
+    End If
+End If
+
+                   'printf("\n________A__________________________\n");
+                     'printf("   |                           |   ");
+                   'printf("\n___|______________________C____|___\n");
+                     'printf("                               |   ");
+                   'printf("\n                 B_____________|___\n");
+
+
+
+
+
+If tripolarABC = 1 Then
+    If bipolarBC > 0 Then
+        If monopolarA = 0 Then
+            If monopolarB = 1 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 1 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarBC = bipolarBC - 1
+                direita = direita + 2
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                direita = direita + 1
+            End If
+        End If
+    End If
+End If
+                   'printf("\n_________________B_________________\n");
+                     'printf("   |                           |   ");
+                   'printf("\n___|______________________C____|___\n");
+                     'printf("   |                               ");
+                   'printf("\n___|____A        B_________________\n");
+
+
+If tripolarABC = 1 Then
+    If bipolarBC > 0 Then
+        If monopolarA = 0 Then
+            If monopolarC = 1 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 3 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarBC = bipolarBC - 1
+                direita = direita + 2
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1
+            End If
+        End If
+    End If
+End If
+                   'printf("\n_________________B_________________\n");
+                     'printf("   |                           |   ");
+                   'printf("\n___|______________________C____|___\n");
+                     'printf("   |                               ");
+                   'printf("\n___|____A                 C________\n");
+
+
+
+
+
+If tripolarABC = 1 Then
+    If bipolarBC > 0 Then
+        If monopolarA = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 4 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarBC = bipolarBC - 1
+                direita = direita + 3 'REVER COMO FICARÁ SLOT VAZIO (SERIA 2 E NAO 3) PODE CABER ALGO AÍ
+        End If
+    End If
+End If
+                   'printf("\n_________________B_________________\n");
+                     'printf("   |                           |   ");
+                   'printf("\n___|______________________C____|___\n");
+                     'printf("   |                               ");
+                   'printf("\n___|____A                          \n");
+
+
+
+
+
+
+If tripolarABC = 1 Then
+    If monopolarA > 0 Then
+        If monopolarB > 0 Then
+            If monopolarC = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 6 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1 'REVER SLOT VAZIO
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                direita = direita + 3
+            End If
+        End If
+    End If
+End If
+                   'printf("\n________A__________________________\n");
+                     'printf("                               |   ");
+                   'printf("\n_________________B_____________|___\n");
+                     'printf("                               |   ");
+                   'printf("\n                          C____|___\n");
+                   
+
+
+
+If tripolarABC = 1 Then
+    If monopolarA > 0 Then
+        If monopolarB = 0 Then
+            If monopolarC > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 5 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1 'REVER SLOT VAZIO
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                direita = direita + 3
+            End If
+        End If
+    End If
+End If
+                   'printf("\n________A__________________________\n");
+                     'printf("                               |   ");
+                   'printf("\n__________________________C____|___\n");
+                     'printf("                               |   ");
+                   'printf("\n                 B_____________|___\n");
+
+
+
+
+If tripolarABC = 1 Then
+    If monopolarA = 0 Then
+        If monopolarB > 0 Then
+            If monopolarC > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 4 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolaB - 1
+                direita = direita + 1
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1
+                direita = direita + 1 'REVER SLOT SOBRANDO
+            End If
+        End If
+    End If
+End If
+                   'printf("\n_________________B_________________\n");
+                     'printf("   |                               ");
+                   'printf("\n___|______________________C________\n");
+                     'printf("   |                               ");
+                   'printf("\n___|____A                          \n");
+
+
+
+
+If tripolarABC = 1 Then
+    If monopolarA > 0 Then
+        If monopolarB = 0 Then
+            If monopolarC = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 5 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1 'REVER SLOT VAZIO
+                y = vy * esquerda
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 6 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1 'REVER SLOT VAZIO
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                direita = direita + 3
+            End If
+        End If
+    End If
+End If
+                   'printf("\n________A__________________________\n");
+                     'printf("                               |   ");
+                   'printf("\n                 B_____________|___\n");
+                     'printf("                               |   ");
+                   'printf("\n                          C____|___\n");
+                   
+
+If tripolarABC = 1 Then
+    If monopolarA = 0 Then
+        If monopolarB > 0 Then
+            If monopolarC = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = -6 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 4 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                direita = direita + 3 'REVER SLOT VAZIO
+            End If
+        End If
+    End If
+End If
+                   'printf("\n_________________B_________________\n");
+                     'printf("   |                               ");
+                   'printf("\n___|______________________C        \n");
+                     'printf("   |                               ");
+                   'printf("\n___|____A                          \n");
+
+
+If tripolarABC = 1 Then
+    If monopolarA = 0 Then
+        If monopolarB = 0 Then
+            If monopolarC > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = -5 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 4 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 3 'REVER SLOT VAZIO
+            End If
+        End If
+    End If
+End If
+                   'printf("\n__________________________C________\n");
+                     'printf("   |                               ");
+                   'printf("\n___|_____________B                 \n");
+                     'printf("   |                               ");
+                   'printf("\n___|____A                          \n");
+
+
+
+                   
+                   
+If tripolarABC = 1 Then
+    If bipolarAB = 0 Then
+        If bipolarAC = 0 Then
+            If bipolarBC = 0 Then
+                If monopolarA = 0 Then
+                    If monopolarB = 0 Then
+                        If monopolarC = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("Tripolar", Dados.Columns(5), 0)
+                Call tripolar
+                Dados.Cells(sobelinha, 5).Clear
+                tripolarABC = tripolarABC - 1
+                Call contatoA
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 4 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = -5 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = -6 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                direita = direita + 3 'REVER SLOT VAZIO
+                        
+                        End If
+                    End If
+                End If
+            End If
+        End If
+    End If
+End If
+                   'printf("\n________A                          \n");
+                     'printf("   |                               ");
+                   'printf("\n___|______________B                \n");
+                     'printf("   |                               ");
+                   'printf("\n___|_______________________C       \n");
+
+
+
+
+                                                                
+
+Do While bipolarAB > 1 Or bipolarAC > 1 Or bipolarBC > 1
+    
+    If bipolarAB > 1 Then
+        'ESQUERDA
+            Call ladoesquerdo
+            sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+            Call bipolar
+            Dados.Cells(sobelinha, 5).Clear
+            bipolarAB = bipolarAB - 1
+            Call contatoA
+            esquerda = esquerda + 1
+            y = vy * esquerda
+            Call contatoB
+            esquerda = esquerda + 1
+        'DIREITA
+            Call ladodireito
+            sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+            Call bipolar
+            Dados.Cells(sobelinha, 5).Clear
+            bipolarAB = bipolarAB - 1
+            direita = direita + 2
+    End If
+                'printf("\n________A__________________________\n");
+                  'printf("   |                           |   ");
+                'printf("\n___|_____________B_____________|___\n");
+    
+    
+    
+    
+    
+    
+    If bipolarAC > 1 Then
+        'ESQUERDA
+            Call ladoesquerdo
+            sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+            Call bipolar
+            Dados.Cells(sobelinha, 5).Clear
+            bipolarAC = bipolarAC - 1
+            Call contatoA
+            esquerda = esquerda + 1
+            y = vy * esquerda
+            Call contatoC
+            esquerda = esquerda + 1
+        'DIREITA
+            Call ladodireito
+            sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+            Call bipolar
+            Dados.Cells(sobelinha, 5).Clear
+            bipolarAC = bipolarAC - 1
+            direita = direita + 2
+    End If
+                'printf("\n________A__________________________\n");
+                  'printf("   |                           |   ");
+                'printf("\n___|______________________C____|___\n");
+
+  
+  
+  
+  
+    If bipolarBC > 1 Then
+        'ESQUERDA
+            Call ladoesquerdo
+            sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+            Call bipolar
+            Dados.Cells(sobelinha, 5).Clear
+            bipolarBC = bipolarBC - 1
+            Call contatoB
+            esquerda = esquerda + 1
+            y = vy * esquerda
+            Call contatoC
+            esquerda = esquerda + 1
+        'DIREITA
+            Call ladodireito
+            sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+            Call bipolar
+            Dados.Cells(sobelinha, 5).Clear
+            bipolarBC = bipolarBC - 1
+            direita = direita + 2
+    End If
+                'printf("\n_________________B_________________\n");
+                  'printf("   |                           |   ");
+                'printf("\n___|______________________C____|___\n");
+
+Loop
+
+                
+                
+                
+                
+If bipolarAB > 0 Then
+    If bipolarAC > 0 Then
+        If monopolarB > 0 Then
+            If monopolarC > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAB = bipolarAB - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAC = bipolarAC - 1
+                direita = direita + 2
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                direita = direita + 1
+            End If
+        End If
+    End If
+End If
+                'printf("\n__________________________C________\n");
+                  'printf("                               |   ");
+                'printf("\n________A______________________|___\n");
+                  'printf("   |                               ");
+                'printf("\n___|_____________B_________________\n");
+
+
+
+If bipolarAB > 0 Then
+    If bipolarBC > 0 Then
+        If monopolarA > 0 Then
+            If monopolarC > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarBC = bipolarBC - 1
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAB = bipolarAB - 1
+                direita = direita + 2
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1
+            End If
+        End If
+    End If
+End If
+                'printf("\n________A__________________________\n");
+                  'printf("                               |   ");
+                'printf("\n_________________B_____________|___\n");
+                  'printf("   |                               ");
+                'printf("\n___|______________________C________\n");
+                
+                
+
+
+If bipolarAC > 0 Then
+    If bipolarBC > 0 Then
+        If monopolarA > 0 Then
+            If monopolarB > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarBC = bipolarBC - 1
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAC = bipolarAC - 1
+                direita = direita + 2
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                direita = direita + 1
+            End If
+        End If
+    End If
+End If
+                'printf("\n________A__________________________\n");
+                  'printf("                               |   ");
+                'printf("\n__________________________C____|___\n");
+                  'printf("   |                               ");
+                'printf("\n___|_____________B_________________\n");
+
+                                
+                
+                
+                
+If bipolarAB > 0 Then
+    If monopolarA > 0 Then
+        If monopolarB > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                Call contatoB
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAB = bipolarAB - 1
+                direita = direita + 2
+        End If
+    End If
+End If
+                'printf("\n________A__________________________\n");
+                  'printf("                               |   ");
+                'printf("\n_________________B_____________|___\n");
+                
+                      
+If bipolarAC > 0 Then
+    If monopolarA > 0 Then
+        If monopolarC > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                Call contatoC
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAC = bipolarAC - 1
+                direita = direita + 2
+        End If
+    End If
+End If
+                'printf("\n________A__________________________\n");
+                  'printf("                               |   ");
+                'printf("\n__________________________C____|___\n");
+
+     
+     
+
+
+
+If bipolarBC > 0 Then
+    If monopolarB > 0 Then
+        If monopolarC > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                Call contatoC
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarBC = bipolarBC - 1
+                direita = direita + 2
+        End If
+    End If
+End If
+                'printf("\n_________________B_________________\n");
+                  'printf("                               |   ");
+                'printf("\n__________________________C____|___\n");
+                
+                
+                
+
+
+If bipolarAB > 0 Then
+    If bipolarAC > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAB = bipolarAB - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 2 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAC = bipolarAC - 1
+                direita = direita + 2
+    End If
+End If
+                'printf("\n________A__________________________\n");
+                  'printf("   |                           |   ");
+                'printf("\n___|_____________B        C____|___\n");
+                
+                
+If bipolarAB > 0 Then
+    If bipolarBC > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAB = bipolarAB - 1
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 3 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarBC = bipolarBC - 1
+                direita = direita + 2
+    End If
+End If
+                'printf("\n_________________B_________________\n");
+                  'printf("   |                           |   ");
+                'printf("\n___|____A                 C____|___\n");
+                
+                
+If bipolarAC > 0 Then
+    If bipolarBC > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAC = bipolarAC - 1
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 1 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarBC = bipolarBC - 1
+                direita = direita + 2
+    End If
+End If
+                'printf("\n__________________________C________\n");
+                  'printf("   |                           |   ");
+                'printf("\n___|____A        B_____________|___\n");
+                
+                
+If bipolarAB > 0 Then
+    If monopolarA > 1 And monopolarA Mod 2 = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 1 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAB = bipolarAB - 1
+                direita = direita + 2
+    End If
+End If
+                'printf("\n________A__________________________\n");
+                  'printf("                               |   ");
+                'printf("\n________A        B_____________|___\n");
+
+
+
+If bipolarAB > 0 Then
+    If monopolarA = 0 Then
+        If monopolarB > 1 And monopolarB Mod 2 = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAB = bipolarAB - 1
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 1 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                direita = direita + 1
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                direita = direita + 1
+        End If
+    End If
+End If
+                'printf("\n_________________B_________________\n");
+                  'printf("   |                               ");
+                'printf("\n___|____A        B_________________\n");
+                
+
+If bipolarAB > 0 Then
+    If monopolarA = 0 Then
+        If monopolarB > 0 Then
+            If monopolarC Mod 2 <> 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAB = bipolarAB - 1
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 3 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                direita = direita + 1
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1
+            End If
+        End If
+    End If
+End If
+                'printf("\n_________________B_________________\n");
+                  'printf("   |                               ");
+                'printf("\n___|____A                 C________\n");
+
+
+
+
+
+
+If bipolarAB > 0 Then
+    If monopolarA > 0 Then
+        If monopolarB = 0 Then
+            If monopolarC Mod 2 <> 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAB = bipolarAB - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 2 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                direita = direita + 1
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1
+            End If
+        End If
+    End If
+End If
+                'printf("\n________A__________________________\n");
+                  'printf("   |                               ");
+                'printf("\n___|_____________B        C________\n");
+              
+                
+                
+If bipolarAB > 0 Then
+    If monopolarA > 0 Then
+        If monopolarB = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 5 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAB = bipolarAB - 1
+                direita = direita + 2
+        End If
+    End If
+End If
+                'printf("\n________A__________________________\n");
+                  'printf("                               |   ");
+                'printf("\n                 B_____________|___\n");
+                
+                
+
+If bipolarAB > 0 Then
+    If monopolarA = 0 Then
+        If monopolarB > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAB = bipolarAB - 1
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 4 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                direita = direita + 2 'REVER SLOT VAZIO
+        End If
+    End If
+End If
+                'printf("\n_________________B_________________\n");
+                  'printf("   |                               ");
+                'printf("\n___|____A                          \n");
+
+
+
+If bipolarAB > 0 Then
+    If monopolarA = 0 Then
+        If monopolarB = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAB", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAB = bipolarAB - 1
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = -5 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 4 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                direita = direita + 2 'REVER SLOT VAZIO
+        End If
+    End If
+End If
+                'printf("\n_________________B                 \n");
+                  'printf("   |                               ");
+                'printf("\n___|____A                          \n");
+
+
+If bipolarAC > 0 Then
+    If monopolarC = 0 Then
+        If monopolarA > 1 And monopolarA Mod 2 = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 3 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAC = bipolarAC - 1
+                direita = direita + 2
+        End If
+    End If
+End If
+                'printf("\n________A__________________________\n");
+                  'printf("                               |   ");
+                'printf("\n________A                 C____|___\n");
+
+
+
+If bipolarAC > 0 Then
+    If monopolarA = 0 Then
+        If monopolarC > 1 And monopolarC Mod 2 = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAC = bipolarAC - 1
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 3 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1
+        End If
+    End If
+End If
+                'printf("\n__________________________C________\n");
+                  'printf("   |                               ");
+                'printf("\n___|____A                 C________\n");
+
+
+
+If bipolarAC > 0 Then
+    If monopolarA = 0 Then
+        If monopolarC > 0 Then
+            If monopolarB Mod 2 <> 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAC = bipolarAC - 1
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 1 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                direita = direita + 1
+            End If
+        End If
+    End If
+End If
+                'printf("\n__________________________C________\n");
+                  'printf("   |                               ");
+                'printf("\n___|____A        B_________________\n");
+                
+                
+                
+                
+                
+                
+                
+                
+If bipolarAC > 0 Then
+    If monopolarA > 0 Then
+        If monopolarC = 0 Then
+            If monopolarB Mod 2 <> 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                Call contatoB
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 2 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAC = bipolarAC - 1
+                direita = direita + 2
+            End If
+        End If
+    End If
+End If
+                'printf("\n________A__________________________\n");
+                  'printf("                               |   ");
+                'printf("\n_________________B        C____|___\n");
+
+
+If bipolarAC > 0 Then
+    If monopolarA > 0 Then
+        If monopolarC = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 6 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAC = bipolarAC - 1
+                direita = direita + 2
+        End If
+    End If
+End If
+                'printf("\n________A__________________________\n");
+                  'printf("                               |   ");
+                'printf("\n                          C____|___\n");
+                
+
+                
+                
+If bipolarAC > 0 Then
+    If monopolarA = 0 Then
+        If monopolarC > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAC = bipolarAC - 1
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 4 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 2 'REVER SLOT
+        End If
+    End If
+End If
+                'printf("\n__________________________C________\n");
+                  'printf("   |                               ");
+                'printf("\n___|____A                          \n");
+                
+
+
+If bipolarAC > 0 Then
+    If monopolarA = 0 Then
+        If monopolarC = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarAC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarAC = bipolarAC - 1
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = -6 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoA
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 4 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                direita = direita + 2 'REVER SLOT
+        End If
+    End If
+End If
+                'printf("\n__________________________C        \n");
+                  'printf("   |                               ");
+                'printf("\n___|____A                          \n");
+
+
+
+
+If bipolarBC > 0 Then
+    If monopolarB > 1 And monopolarB Mod 2 = 0 Then
+        If monopolarC = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                Call contatoB
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 2 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarBC = bipolarBC - 1
+                direita = direita + 2
+        End If
+    End If
+End If
+                'printf("\n_________________B_________________\n");
+                  'printf("                               |   ");
+                'printf("\n_________________B        C____|___\n");
+
+
+
+
+
+If bipolarBC > 0 Then
+    If monopolarB = 0 Then
+        If monopolarC > 1 And monopolarC Mod 2 = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarBC = bipolarBC - 1
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 2 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1
+                y = vy * direita
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1
+        End If
+    End If
+End If
+                'printf("\n__________________________C________\n");
+                  'printf("   |                               ");
+                'printf("\n___|_____________B        C________\n");
+
+
+
+
+
+If bipolarBC > 0 Then
+    If monopolarB = 0 Then
+        If monopolarC > 0 Then
+            If monopolarA Mod 2 <> 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 1 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarBC = bipolarBC - 1
+                direita = direita + 2
+            End If
+        End If
+    End If
+End If
+                'printf("\n__________________________C________\n");
+                  'printf("                               |   ");
+                'printf("\n________A        B_____________|___\n");
+
+
+
+
+
+If bipolarBC > 0 Then
+    If monopolarB > 0 Then
+        If monopolarC = 0 Then
+            If monopolarA Mod 2 <> 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 3 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarBC = bipolarBC - 1
+                direita = direita + 2
+            End If
+        End If
+    End If
+End If
+                'printf("\n_________________B_________________\n");
+                  'printf("                               |   ");
+                'printf("\n________A                 C____|___\n");
+                
+                
+                
+                
+
+If bipolarBC > 0 Then
+    If monopolarB > 0 Then
+        If monopolarC = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                Call contatoB
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 6 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarBC = bipolarBC - 1
+                direita = direita + 2
+        End If
+    End If
+End If
+                'printf("\n_________________B_________________\n");
+                  'printf("                               |   ");
+                'printf("\n                          C____|___\n");
+
+
+
+
+
+If bipolarBC > 0 Then
+    If monopolarB = 0 Then
+        If monopolarC > 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarBC = bipolarBC - 1
+                Call contatoC
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = -5 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 2 'REVER SLOT VAZIO
+        End If
+    End If
+End If
+                'printf("\n__________________________C________\n");
+                  'printf("   |                               ");
+                'printf("\n___|_____________B                 \n");
+
+
+
+
+
+
+If bipolarBC > 0 Then
+    If monopolarB = 0 Then
+        If monopolarC = 0 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 5 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+                y = vy * esquerda
+                Call contatoC 'REVER SLOTS VAZIOS
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 6 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("BipolarBC", Dados.Columns(5), 0)
+                Call bipolar
+                Dados.Cells(sobelinha, 5).Clear
+                bipolarBC = bipolarBC - 1
+                direita = direita + 2
+        End If
+    End If
+End If
+                'printf("\n                 B_________________\n");
+                  'printf("                               |   ");
+                'printf("\n                          C____|___\n");
+
+
+
+
+Do While monopolarA > 1 Or monopolarB > 1 Or monopolarC > 1
+
+If monopolarA > 1 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                direita = direita + 1
+End If
+                'printf("\n________A__________________________\n");
+                
+                
+                
+If monopolarB > 1 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                Call contatoB
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                direita = direita + 1
+End If
+                'printf("\n_________________B_________________\n");
+
+
+
+If monopolarC > 1 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                Call contatoC
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1
+End If
+                'printf("\n__________________________C________\n");
+
+Loop
+
+
+
+
+If monopolarA = 1 And monopolarB = 1 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 1 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                direita = direita + 1
+End If
+                'printf("\n________A        B_____________|___\n");
+                
+                
+                
+If monopolarA = 1 And monopolarC = 1 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 3 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1
+End If
+                'printf("\n________A                 C________\n");
+                
+                
+If monopolarB = 1 And monopolarC = 1 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                Call contatoB
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 2 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1
+End If
+                'printf("\n_________________B        C________\n");
+                
+                
+
+If monopolarA = 1 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarA", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarA = monopolarA - 1
+                Call contatoA
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 4 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                direita = direita + 1 'REVER SLOT VAZIO
+End If
+                'printf("\n________A
+                
+                
+If monopolarB = 1 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                sobelinha = WorksheetFunction.Match("MonopolarB", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarB = monopolarB - 1
+                Call contatoB
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = -5 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                direita = direita + 1 'REVER SLOT VAZIO
+End If
+                'printf("\n_________________B
+
+
+
+If monopolarC = 1 Then
+            'ESQUERDA
+                Call ladoesquerdo
+                Call contatoC
+                Dados.Cells(trimhorizontal, 6) = esquerda 'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+                Dados.Cells(trimhorizontal, 7) = 6 '1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+                trimhorizontal = trimhorizontal + 1
+                esquerda = esquerda + 1
+            'DIREITA
+                Call ladodireito
+                sobelinha = WorksheetFunction.Match("MonopolarC", Dados.Columns(5), 0)
+                Call monopolar
+                Dados.Cells(sobelinha, 5).Clear
+                monopolarC = monopolarC - 1
+                direita = direita + 1 'REVER SLOT VAZIO
+End If
+                'printf("\n                          C________\n");
+
+
+
+Call imprimelinhas
+Call moldura
+
+Script.Cells(linhascript, 1) = "zoom"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "window"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(-dtxt2 - 50)) & "," & Trim(Str(50))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(hor + dtxt2 + 50)) & "," & Trim(Str(vy * esquerda - 50))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "delay"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "5000"
+                                                                           linhascript = linhascript + 1
+Call trimdaslinhashorizontais
+
+Script.Cells(linhascript, 1) = "move"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "all"
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "0,0"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "10000,10000"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "zoom"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "extents"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "pan"
+                                                                                                                                   
+
+
+'________________________________________________________________________________________________________
+
+Dim salvarComo As Variant
+
+salvarComo = Application.GetSaveAsFilename("barramento.scr", "Script Autocad (*.scr), *.scr")
+
+If salvarComo = False Then Exit Sub
+
+
+Dim Resultado As String
+i = 1
+
+Dim linha As String
+
+Resultado = ""
+
+Do While i <= linhascript
+
+    linha = Script.Cells(i, 1).FormulaLocal
+
+    If Len(linha) = 0 Then
+    
+        If Right(Resultado, 1) <> vbCrLf Then
+            Resultado = Resultado & vbCrLf
+        End If
+    
+     Else
+        Resultado = Resultado & linha & vbCrLf
+    End If
+    i = i + 1
+Loop
+
+If SaveTextToFile(salvarComo, Resultado, True) = True Then
+    Call MsgBox("Arquivo salvo com sucesso!", vbInformation, "Salvar")
+Else
+    Call MsgBox("Ocorreu um erro ao salvar o arquivo!", vbCritical, "Salvar")
+End If
+
+End If
+End If
+
+Unload Me
+
+End Sub
+Public Function SaveTextToFile(FileFullPath As Variant, sText As String, Optional Overwrite As Boolean = False) As Boolean
+
+On Error GoTo ErrorHandler
+Dim iFileNumber As Integer
+iFileNumber = FreeFile
+
+If Overwrite Then
+    Open FileFullPath For Output As #iFileNumber
+Else
+    Open FileFullPath For Append As #iFileNumber
+End If
+
+Print #iFileNumber, sText
+SaveTextToFile = True
+
+ErrorHandler:
+Close #iFileNumber
+End Function
+
+Function contatoA()
+Script.Cells(linhascript, 1) = "donut"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = 0
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = 14
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx + (hor - vx) / 2 - 50)) & "," & Trim(Str(y))
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+End Function
+
+Function contatoB()
+Script.Cells(linhascript, 1) = "donut"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = 0
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = 14
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx + (hor - vx) / 2)) & "," & Trim(Str(y))
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+End Function
+
+Function contatoC()
+Script.Cells(linhascript, 1) = "donut"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = 0
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = 14
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx + (hor - vx) / 2 + 50)) & "," & Trim(Str(y))
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+End Function
+
+Function monopolar()
+
+Script.Cells(linhascript, 1) = "circle"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x)) & "," & Trim(Str(y))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(r))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "circle"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx)) & "," & Trim(Str(y))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(r))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "arc"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x - 5)) & "," & Trim(Str(y + 10))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx / 2)) & "," & Trim(Str(y + 22.5))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx + 5)) & "," & Trim(Str(y + 10))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "line"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx / 2)) & "," & Trim(Str(y + 10))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx / 2)) & "," & Trim(Str(y + 35))
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+'IMPRIME TEXTO DO CIRCUITO
+Script.Cells(linhascript, 1) = "text" 'CORRENTE
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "justify"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "center"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx / 2)) & "," & Trim(Str(y + 22.5 + 25)) 'PONTO MEDIO DO PRIMEIRO ARCO
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(alturatexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(angulotexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Dados.Cells(sobelinha, 4)
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "text" 'NUMERO DO CIRCUITO
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "justify"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "center"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + distext)) & "," & Trim(Str(y)) 'CENTRO VERTICAL DO DISJUNTOR
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(alturatexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(angulotexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Dados.Cells(sobelinha, 2)
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "text" 'NOME DO CIRCUITO
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "justify"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "center"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + distext2)) & "," & Trim(Str(y)) 'CIRCULO CENTRAL DIREITO
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(alturatexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(angulotexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Dados.Cells(sobelinha, 3)
+                                                                           linhascript = linhascript + 1
+End Function
+
+Function bipolar()
+
+Script.Cells(linhascript, 1) = "circle"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x)) & "," & Trim(Str(y))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(r))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "circle"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx)) & "," & Trim(Str(y))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(r))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "arc"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x - 5)) & "," & Trim(Str(y + 10))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx / 2)) & "," & Trim(Str(y + 22.5))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx + 5)) & "," & Trim(Str(y + 10))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "circle"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x)) & "," & Trim(Str(y + vy))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(r))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "circle"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx)) & "," & Trim(Str(y + vy))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(r))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "arc"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x - 5)) & "," & Trim(Str(y + vy + 10))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx / 2)) & "," & Trim(Str(y + vy + 22.5))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx + 5)) & "," & Trim(Str(y + vy + 10))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "line"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx / 2)) & "," & Trim(Str(y + 22.5))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx / 2)) & "," & Trim(Str(y + vy + 22.5))
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+'IMPRIME TEXTO DO CIRCUITO
+Script.Cells(linhascript, 1) = "text" 'CORRENTE
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "justify"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "center"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx / 2)) & "," & Trim(Str(y + 22.5 + 25)) 'PONTO MEDIO DO PRIMEIRO ARCO
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(alturatexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(angulotexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Dados.Cells(sobelinha, 4)
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "text" 'NUMERO DO CIRCUITO
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "justify"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "center"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + distext)) & "," & Trim(Str(y + vy / 2))  'CENTRO VERTICAL DO DISJUNTOR
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(alturatexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(angulotexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Dados.Cells(sobelinha, 2)
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "text" 'NOME DO CIRCUITO
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "justify"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "center"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + distext2)) & "," & Trim(Str(y + vy / 2)) 'CIRCULO CENTRAL DIREITO
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(alturatexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(angulotexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Dados.Cells(sobelinha, 3)
+                                                                           linhascript = linhascript + 1
+'IMPRIME COLCHETES
+Script.Cells(linhascript, 1) = "line"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + (Abs(distext) - 60) * ncolchete)) & "," & Trim(Str(y + 10))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + (Abs(distext) - 50) * ncolchete)) & "," & Trim(Str(y))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + (Abs(distext) - 50) * ncolchete)) & "," & Trim(Str(y + vy / 2 + 7.5))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + (Abs(distext) - 35) * ncolchete)) & "," & Trim(Str(y + vy / 2))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + (Abs(distext) - 50) * ncolchete)) & "," & Trim(Str(y + vy / 2 - 7.5))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + (Abs(distext) - 50) * ncolchete)) & "," & Trim(Str(y + vy))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + (Abs(distext) - 60) * ncolchete)) & "," & Trim(Str(y + vy - 10))
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+End Function
+
+Function tripolar()
+
+Script.Cells(linhascript, 1) = "circle"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x)) & "," & Trim(Str(y))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(r))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "circle"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx)) & "," & Trim(Str(y))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(r))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "arc"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x - 5)) & "," & Trim(Str(y + 10))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx / 2)) & "," & Trim(Str(y + 22.5))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx + 5)) & "," & Trim(Str(y + 10))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "circle"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x)) & "," & Trim(Str(y + vy))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(r))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "circle"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx)) & "," & Trim(Str(y + vy))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(r))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "arc"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x - 5)) & "," & Trim(Str(y + vy + 10))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx / 2)) & "," & Trim(Str(y + vy + 22.5))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx + 5)) & "," & Trim(Str(y + vy + 10))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "circle"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x)) & "," & Trim(Str(y + 2 * vy))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(r))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "circle"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx)) & "," & Trim(Str(y + 2 * vy))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(r))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "arc"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x - 5)) & "," & Trim(Str(y + 2 * vy + 10))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx / 2)) & "," & Trim(Str(y + 2 * vy + 22.5))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx + 5)) & "," & Trim(Str(y + 2 * vy + 10))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "line"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx / 2)) & "," & Trim(Str(y + 22.5))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx / 2)) & "," & Trim(Str(y + 22.5 + 2 * vy))
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+'IMPRIME TEXTO DO CIRCUITO
+Script.Cells(linhascript, 1) = "text" 'CORRENTE
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "justify"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "center"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx / 2)) & "," & Trim(Str(y + 22.5 + 25)) 'PONTO MEDIO DO PRIMEIRO ARCO
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(alturatexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(angulotexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Dados.Cells(sobelinha, 4)
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "text" 'NUMERO DO CIRCUITO
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "justify"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "center"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + distext)) & "," & Trim(Str(y + vy)) 'CENTRO VERTICAL DO DISJUNTOR
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(alturatexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(angulotexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Dados.Cells(sobelinha, 2)
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "text" 'NOME DO CIRCUITO
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "justify"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "center"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + distext2)) & "," & Trim(Str(y + vy)) 'CIRCULO CENTRAL DIREITO
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(alturatexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(angulotexto))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Dados.Cells(sobelinha, 3)
+                                                                           linhascript = linhascript + 1
+'IMPRIME COLCHETES
+Script.Cells(linhascript, 1) = "line"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + (Abs(distext) - 60) * ncolchete)) & "," & Trim(Str(y + 10))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str((x + Abs(distext) - 50) * ncolchete)) & "," & Trim(Str(y))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + (Abs(distext) - 50) * ncolchete)) & "," & Trim(Str(y + vy + 7.5))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + (Abs(distext) - 35) * ncolchete)) & "," & Trim(Str(y + vy))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + (Abs(distext) - 50) * ncolchete)) & "," & Trim(Str(y + vy - 7.5))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + (Abs(distext) - 50) * ncolchete)) & "," & Trim(Str(y + 2 * vy))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + (Abs(distext) - 60) * ncolchete)) & "," & Trim(Str(y + 2 * vy - 10))
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+
+End Function
+
+Function imprimelinhas()
+
+'IMPRIME LINHAS NA HORIZONTAL
+If esquerda >= direita Then
+cont = esquerda - 1
+Else
+cont = direita - 1
+End If
+
+x = 0
+
+Do While cont >= 0
+y = cont * vy
+Script.Cells(linhascript, 1) = "line"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx + r)) & "," & Trim(Str(y))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + hor - r)) & "," & Trim(Str(y))
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+cont = cont - 1
+Loop
+
+'IMPRIME LINHAS NA VERTICAL
+If esquerda >= direita Then
+cont = esquerda
+Else
+cont = direita
+End If
+
+y = cont * vy
+Script.Cells(linhascript, 1) = "line"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx + (hor - vx) / 2)) & "," & Trim(Str(y))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx + (hor - vx) / 2)) & "," & Trim(Str(y - cont * vy))
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "line"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx + 50 + (hor - vx) / 2)) & "," & Trim(Str(y))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx + 50 + (hor - vx) / 2)) & "," & Trim(Str(y - cont * vy))
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "line"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx - 50 + (hor - vx) / 2)) & "," & Trim(Str(y))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(x + vx - 50 + (hor - vx) / 2)) & "," & Trim(Str(y - cont * vy))
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+End Function
+
+Function ladoesquerdo()
+
+x = xinicial
+y = vy * esquerda
+distext = -dtxt
+distext2 = -dtxt2
+ncolchete = -1
+
+End Function
+
+Function ladodireito()
+
+y = vy * direita
+distext = dtxt + vx
+distext2 = dtxt2 + vx
+x = hor
+ncolchete = 1
+
+End Function
+
+Function trimdaslinhashorizontais()
+
+'Dados.Cells(trimhorizontal, 6) = esquerda
+'LOCALIZAÇÃO VERTICAL ONDE SERÁ APLICADO O TRIM
+
+'Dados.Cells(trimhorizontal, 7) = 6
+'1 PARA (AB), 2 PARA (BC), 3 PARA (AC), 4 PARA (A), 5 PARA (B) E 6 PARA (C)
+
+cont = 1
+Do While Dados.Cells(cont, 6) <> ""
+
+If Dados.Cells(cont, 7) = 1 Then
+    Call trimAB
+End If
+
+If Dados.Cells(cont, 7) = 2 Then
+    Call trimBC
+End If
+
+If Dados.Cells(cont, 7) = 3 Then
+    Call trimAB
+    Call trimBC
+End If
+
+If Dados.Cells(cont, 7) = 4 Then
+    Call trimDIR
+    Call trimBC
+    Call trimAB
+End If
+
+If Dados.Cells(cont, 7) = 5 Then
+    Call trimESQ
+    Call trimAB
+End If
+
+If Dados.Cells(cont, 7) = -5 Then
+    Call trimDIR
+    Call trimBC
+End If
+
+If Dados.Cells(cont, 7) = 6 Then
+    Call trimESQ
+    Call trimAB
+    Call trimBC
+End If
+
+If Dados.Cells(cont, 7) = -6 Then
+    Call trimDIR
+End If
+
+cont = cont + 1
+Loop
+
+End Function
+
+
+
+Function trimAB()
+Script.Cells(linhascript, 1) = "trim"
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(vx + (hor - vx) / 2 - 25)) & "," & Trim(Str(Dados.Cells(cont, 6) * vy))
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+End Function
+
+Function trimBC()
+Script.Cells(linhascript, 1) = "trim"
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(vx + (hor - vx) / 2 + 25)) & "," & Trim(Str(Dados.Cells(cont, 6) * vy))
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+End Function
+
+Function trimESQ()
+Script.Cells(linhascript, 1) = "trim"
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(vx + r + 1)) & "," & Trim(Str(Dados.Cells(cont, 6) * vy))
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+End Function
+
+Function trimDIR()
+Script.Cells(linhascript, 1) = "trim"
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(hor - r - 1)) & "," & Trim(Str(Dados.Cells(cont, 6) * vy))
+                                                                           linhascript = linhascript + 1
+                                                                           linhascript = linhascript + 1
+End Function
+
+Private Sub rand_Click()
+cont = 1
+Do While Dados.Cells(cont, 1) <> ""
+Dados.Cells(cont, 2) = cont
+Dados.Cells(cont, 3) = cont
+Dados.Cells(cont, 4) = cont
+cont = cont + 1
+Loop
+
+End Sub
+
+Function moldura()
+
+Script.Cells(linhascript, 1) = "celayer"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "PHANTOM"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = "rectangle"
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(-350)) & "," & Trim(Str(500))
+                                                                           linhascript = linhascript + 1
+Script.Cells(linhascript, 1) = Trim(Str(350 + hor + vx)) & "," & Trim(Str(vy * esquerda - 100))
+                                                                           linhascript = linhascript + 1
+End Function
+
+Private Sub UserForm_Click()
+
+End Sub
