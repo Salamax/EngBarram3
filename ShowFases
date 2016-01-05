@@ -1,0 +1,3 @@
+Private Sub criaprojeto_Click()
+distribuifases.Show
+End Sub
