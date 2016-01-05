@@ -1,0 +1,16 @@
+Sub DescobreSerialHD()
+
+
+strComputer = "."
+Set objWMIService = GetObject("winmgmts:\\" & strComputer & "\root\CIMV2")
+Set colItems = objWMIService.ExecQuery( _
+    "SELECT * FROM Win32_DiskDrive", , 48)
+
+i = 1
+For Each objItem In colItems
+    Plan1.Cells(i, 1).FormulaLocal = "HD do computador: " & Trim(objItem.SerialNumber)
+    i = i + 1
+Next
+
+
+End Sub
